@@ -1,7 +1,12 @@
-import '../services/location.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'package:clima/screens/location_screen.dart';
+import 'package:clima/services/networking.dart';
+
+import '../services/location.dart';
+
+const String apiKey = 'c9db25feaa50da245b8f05b969e3136f';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -14,43 +19,37 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-    getPosition();
+    getLocationData();
   }
 
-  void getPosition() async {
+  void getLocationData() async {
     Location location = Location();
     await location.getPosition();
     latitude = location.latitude;
     longtitude = location.longtitude;
-  }
 
-  void getData() async {
-    String api = 'c9db25feaa50da245b8f05b969e3136f';
-    http.Response response = await http.get(
-        'https://samples.openweathermap.org/data/2.5/weather?lat={$latitude}&lon={$longtitude}&appid={$api}');
-    if (response.statusCode == 200) {
-      String data = response.body;
-      var decodedData = jsonDecode(data);
-      double temperature = decodedData['main']['temp'];
-      int condition = decodedData['weather'][0]['id'];
-      String cityName = decodedData['name'];
-
-      print(temperature);
-      print(condition);
-      print(cityName);
-    } else {
-      print(response.statusCode);
-    }
+    NetworkHelp networkHelp = NetworkHelp(
+        url:
+            'https://samples.openweathermap.org/data/2.5/weather?lat={$latitude}&lon={$longtitude}&appid={$apiKey}');
+    var weatherData = await networkHelp.getData();
+    print(weatherData);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LocationScreen(
+          locationWeather: weatherData,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: RaisedButton(
-          onPressed: () {
-            getData();
-          },
+        child: SpinKitDoubleBounce(
+          color: Colors.white,
+          size: 100.0,
         ),
       ),
     );
