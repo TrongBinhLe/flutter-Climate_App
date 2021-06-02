@@ -12,6 +12,7 @@ class NetworkHelp {
       return jsonDecode(data);
     } else {
       print(response.statusCode);
+      // print('error');
     }
   }
 }
